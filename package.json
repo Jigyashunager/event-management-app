@@ -1,0 +1,43 @@
+{
+  "name": "event-management-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:web\" \"npm run dev:vendor\"",
+    "dev:gateway": "npm run start:dev --workspace=services/api-gateway",
+    "dev:web": "npm run dev --workspace=apps/customer-web",
+    "dev:vendor": "npm run dev --workspace=apps/vendor-dashboard",
+    "dev:venue": "npm run dev --workspace=apps/venue-dashboard",
+    "dev:admin": "npm run dev --workspace=apps/admin-dashboard",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "npm run type-check --workspaces",
+    "test": "npm run test --workspaces",
+    "db:generate": "npm run db:generate --workspace=packages/database",
+    "db:migrate": "npm run db:migrate --workspace=packages/database",
+    "docker:dev": "docker-compose -f tools/docker/docker-compose.dev.yml up -d",
+    "docker:down": "docker-compose -f tools/docker/docker-compose.dev.yml down",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@darraghor/eslint-plugin-nestjs-typed": "^5.0.0",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^8.0.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.4.5"
+  }
+}

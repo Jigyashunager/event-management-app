@@ -1,0 +1,18 @@
+{
+  "extends": ["plugin:@typescript-eslint/recommended"],
+  "env": {
+    "node": true,
+    "browser": false
+  },
+  "rules": {
+    "no-console": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ]
+  },
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json",
+    "sourceType": "module"
+  }
+}

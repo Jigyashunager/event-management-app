@@ -1,0 +1,28 @@
+{
+  "name": "@event-platform/vendor-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@event-platform/ui-components": "*",
+    "@event-platform/types": "*",
+    "recharts": "^2.12.7",
+    "react-calendar": "^4.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "eslint-config-next": "^14.2.3",
+    "typescript": "^5.4.5"
+  }
+}
