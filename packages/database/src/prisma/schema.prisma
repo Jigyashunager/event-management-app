@@ -1,0 +1,339 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  phone       String?
+  password    String
+  role        UserRole
+  isActive    Boolean  @default(true)
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  customerProfile CustomerProfile?
+  vendorProfile   VendorProfile?
+  venueProfile    VenueProfile?
+  events          Event[]
+  reviews         Review[]
+  bookings        Booking[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  CUSTOMER
+  VENDOR
+  VENUE_OWNER
+  ADMIN
+
+  @@map("user_roles")
+}
+
+model CustomerProfile {
+  id               String @id @default(cuid())
+  userId           String @unique
+  preferredBudget  Int?
+  preferredCities  String[]
+  eventHistory     Json?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("customer_profiles")
+}
+
+model VendorProfile {
+  id           String      @id @default(cuid())
+  userId       String      @unique
+  businessName String
+  category     VendorCategory
+  description  String?
+  serviceAreas String[]
+  priceRange   String
+  portfolio    String[]
+  isVerified   Boolean     @default(false)
+  rating       Float       @default(0)
+  totalReviews Int         @default(0)
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services Service[]
+  bookings Booking[]
+  reviews  Review[]
+
+  @@map("vendor_profiles")
+}
+
+enum VendorCategory {
+  CATERING
+  PHOTOGRAPHY
+  DECORATION
+  MUSIC_DJ
+  TRANSPORTATION
+  MAKEUP_ARTIST
+  MEHENDI_ARTIST
+  FLORIST
+  LIGHTING
+  SECURITY
+  OTHER
+
+  @@map("vendor_categories")
+}
+
+model VenueProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  description String?
+  address     String
+  city        String
+  state       String
+  pincode     String
+  latitude    Float?
+  longitude   Float?
+  capacity    Int
+  amenities   String[]
+  images      String[]
+  pricePerHour Int
+  isActive    Boolean  @default(true)
+  rating      Float    @default(0)
+  totalReviews Int     @default(0)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events   Event[]
+  bookings Booking[]
+  reviews  Review[]
+
+  @@map("venue_profiles")
+}
+
+// Event Management
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  type        EventType
+  description String?
+  eventDate   DateTime
+  startTime   DateTime
+  endTime     DateTime
+  guestCount  Int
+  budget      Int
+  status      EventStatus @default(PLANNING)
+  
+  customerId  String
+  venueId     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  customer User          @relation(fields: [customerId], references: [id])
+  venue    VenueProfile? @relation(fields: [venueId], references: [id])
+  bookings Booking[]
+  reviews  Review[]
+
+  @@map("events")
+}
+
+enum EventType {
+  WEDDING
+  CORPORATE
+  BIRTHDAY
+  ANNIVERSARY
+  ENGAGEMENT
+  BABY_SHOWER
+  GRADUATION
+  OTHER
+
+  @@map("event_types")
+}
+
+enum EventStatus {
+  PLANNING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("event_status")
+}
+
+// Service Management
+model Service {
+  id          String @id @default(cuid())
+  name        String
+  category    VendorCategory
+  description String?
+  basePrice   Int
+  isActive    Boolean @default(true)
+  
+  vendorId    String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vendor   VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@map("services")
+}
+
+// Booking Management
+model Booking {
+  id          String        @id @default(cuid())
+  eventId     String
+  serviceId   String?
+  venueId     String?
+  customerId  String
+  vendorId    String?
+  
+  bookingDate DateTime
+  status      BookingStatus @default(PENDING)
+  totalAmount Int
+  paidAmount  Int           @default(0)
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  event    Event          @relation(fields: [eventId], references: [id])
+  service  Service?       @relation(fields: [serviceId], references: [id])
+  venue    VenueProfile?  @relation(fields: [venueId], references: [id])
+  customer User           @relation(fields: [customerId], references: [id])
+  vendor   VendorProfile? @relation(fields: [vendorId], references: [id])
+  payments Payment[]
+
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+
+  @@map("booking_status")
+}
+
+// Payment Management
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String
+  amount        Int
+  status        PaymentStatus @default(PENDING)
+  method        PaymentMethod
+  transactionId String?
+  gatewayResponse Json?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+
+  @@map("payment_status")
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  UPI
+  NET_BANKING
+  WALLET
+
+  @@map("payment_methods")
+}
+
+// Review & Rating System
+model Review {
+  id        String @id @default(cuid())
+  rating    Int    // 1-5 stars
+  comment   String?
+  
+  eventId   String?
+  venueId   String?
+  vendorId  String?
+  userId    String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  event  Event?         @relation(fields: [eventId], references: [id])
+  venue  VenueProfile?  @relation(fields: [venueId], references: [id])
+  vendor VendorProfile? @relation(fields: [vendorId], references: [id])
+  user   User           @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
+
+// Notification System
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  EVENT_REMINDER
+  REVIEW_REQUEST
+  SYSTEM_UPDATE
+
+  @@map("notification_types")
+}
+
+// Analytics & Reporting
+model Analytics {
+  id        String      @id @default(cuid())
+  entityId  String      // venue/vendor/event id
+  entityType EntityType
+  metric    String      // views, bookings, revenue, etc.
+  value     Float
+  date      DateTime
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@map("analytics")
+}
+
+enum EntityType {
+  VENUE
+  VENDOR
+  EVENT
+  USER
+
+  @@map("entity_types")
+}
