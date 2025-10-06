@@ -8,12 +8,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:web\" \"npm run dev:vendor\"",
+    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:web\" \"npm run dev:vendor\" \"npm run dev:landing\"",
     "dev:gateway": "npm run start:dev --workspace=services/api-gateway",
     "dev:web": "npm run dev --workspace=apps/customer-web",
     "dev:vendor": "npm run dev --workspace=apps/vendor-dashboard",
     "dev:venue": "npm run dev --workspace=apps/venue-dashboard",
     "dev:admin": "npm run dev --workspace=apps/admin-dashboard",
+    "dev:landing": "npm run dev --workspace=apps/landing-page",
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",

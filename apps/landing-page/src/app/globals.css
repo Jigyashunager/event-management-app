@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Your custom config goes here in CSS now */
+@theme {
+  --color-primary: #3b82f6;
+  /* Add other custom theme values as needed */
+}
